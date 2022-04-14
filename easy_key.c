@@ -13,7 +13,7 @@
  * @note        Modify this part
  */
 //--------------------------------------------------------------------------
-__attribute__((weak)) void key_sync(EasyKey_t *key)
+__attribute__((weak)) void EasyKey_Sync(EasyKey_t *key)
 {
     key->value = !GPIO_ReadInDataBit(key->GPIOX,key->init.Pins);
 
@@ -22,19 +22,19 @@ __attribute__((weak)) void key_sync(EasyKey_t *key)
 }
 
 
-__attribute__((weak)) void key_PressCallback(EasyKey_t *key)
+__attribute__((weak)) void EasyKey_PressCallback(EasyKey_t *key)
 {
     
 }
 
 
-__attribute__((weak)) void key_HoldCallback(EasyKey_t *key)
+__attribute__((weak)) void EasyKey_HoldCallback(EasyKey_t *key)
 {
     
 }
 
 
-__attribute__((weak)) void key_MultiClickCallback(EasyKey_t *key)
+__attribute__((weak)) void EasyKey_MultiClickCallback(EasyKey_t *key)
 {
     
 }
@@ -52,7 +52,7 @@ __attribute__((weak)) void key_MultiClickCallback(EasyKey_t *key)
  */
 EasyKey_t *head = NULL, *tail = NULL;
 
-void key_init(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period)
+void EasyKey_Init(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period)
 {
     key->state = release;
     key->next = NULL;
@@ -99,12 +99,12 @@ void key_init(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period)
  * @return      void
  * @note        Don't modify
  */
-void key_handler()
+void EasyKey_Handler()
 {
     for (EasyKey_t *key = head; key != NULL; key = key->next)
     {
         // Get key value
-        key_sync(key);
+        EasyKey_Sync(key);
 
         // Time counter
         if (key->value & key->preval)
@@ -141,7 +141,8 @@ void key_handler()
                 {
                     if (key->hold_time > PRESS_THRESHOLD && key->hold_time < HOLD_THRESHOLD)
                     {
-                        key->state = preclick;
+                        key->state = pre_click;
+                        key->click_count++;
                         key->interval_time = 0;
                         key->hold_time = 0;
                     }
@@ -154,7 +155,7 @@ void key_handler()
                 break;
             }
 
-            case preclick:
+            case pre_click:
             {
                 static uint8_t t = 0;
                 if (key->interval_time < INTERVAL_THRESHOLD)
@@ -162,6 +163,7 @@ void key_handler()
                     if (key->value)
                     {
                         key->state = multi_click;
+                        key->click_count++;
                         key->interval_time = 0;
                         t = 0;
                     }
@@ -175,17 +177,9 @@ void key_handler()
             case press:
             {
                 static uint8_t i = 0;
-                key_PressCallback(key);
+                EasyKey_PressCallback(key);
                 if(!key->value)
                 {
-                    // Increase status show time
-                    if (i < 5)
-                    {
-                        i++;
-                        break;
-                    }
-                    i = 0;
-                    
                     key->state = release;
                     key->hold_time = 0;
                 }                
@@ -194,7 +188,7 @@ void key_handler()
 
             case hold:
             {
-                key_HoldCallback(key);
+                EasyKey_HoldCallback(key);
                 if(!key->value)
                 {
                     key->state = release;
@@ -205,17 +199,7 @@ void key_handler()
 
             case multi_click:
             {
-                static uint8_t j = 0;
-                key_MultiClickCallback(key);
-                key->click_count++;
-
-                // Increase status show time
-                if (j < 3)
-                {
-                    j++;
-                    break;
-                }
-                j = 0;
+                EasyKey_MultiClickCallback(key);
 
                 if(key->interval_time > INTERVAL_THRESHOLD)
                 {
@@ -223,6 +207,10 @@ void key_handler()
                     key->hold_time = 0;
                     key->interval_time = 0;
                     key->click_count = 0;
+                }
+                else if (key->value)
+                {
+                    key->state = dither;
                 }
                 break;
             }
