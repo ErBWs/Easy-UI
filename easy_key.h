@@ -35,6 +35,7 @@ typedef struct EasyKey_typedef
         release,
         dither,
         pre_click,
+        in_click,
 
         // User call
         press,

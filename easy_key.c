@@ -70,7 +70,7 @@ void EasyKey_Init(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period)
 	key->init.PinMode = GPIO_PinMode_In_PullUp;
 	key->init.Pins = (1u << num);
 	key->init.Speed = GPIO_Speed_50MHz;
-    key->GPIOX = ((GPIO_Type*)(AHB1_2_BASE + (pin&0xBF - 1) * 1024));
+    key->GPIOX = ( (GPIO_Type*)(AHB1_2_BASE + (pin&0xBF - 1) * 1024) );
 	GPIO_Init(key->GPIOX, &key->init);
 
   #elif
@@ -157,15 +157,12 @@ void EasyKey_Handler()
 
             case pre_click:
             {
-                static uint8_t t = 0;
                 if (key->interval_time < INTERVAL_THRESHOLD)
                 {
-                    if (key->value)
+                    if (key->hold_time > PRESS_THRESHOLD)
                     {
                         key->state = multi_click;
                         key->click_count++;
-                        key->interval_time = 0;
-                        t = 0;
                     }
                     break;
                 }
@@ -174,11 +171,30 @@ void EasyKey_Handler()
                 break;
             }
 
+            case in_click:
+            {
+                if (key->interval_time < INTERVAL_THRESHOLD)
+                {
+                    if (key->hold_time > PRESS_THRESHOLD)
+                    {
+                        key->state = multi_click;
+                        key->click_count++;
+                    }
+                }
+                else
+                {
+                    key->state = release;
+                    key->click_count = 0;
+                    key->hold_time = 0;
+                    key->interval_time = 0;
+                }
+                break;
+            }
+
             case press:
             {
-                static uint8_t i = 0;
                 EasyKey_PressCallback(key);
-                if(!key->value)
+                if (!key->value)
                 {
                     key->state = release;
                     key->hold_time = 0;
@@ -189,7 +205,8 @@ void EasyKey_Handler()
             case hold:
             {
                 EasyKey_HoldCallback(key);
-                if(!key->value)
+
+                if (!key->value)
                 {
                     key->state = release;
                     key->hold_time = 0;
@@ -201,16 +218,18 @@ void EasyKey_Handler()
             {
                 EasyKey_MultiClickCallback(key);
 
-                if(key->interval_time > INTERVAL_THRESHOLD)
+                if (key->interval_time > INTERVAL_THRESHOLD)
                 {
                     key->state = release;
                     key->hold_time = 0;
                     key->interval_time = 0;
                     key->click_count = 0;
                 }
-                else if (key->value)
+                else if (!key->value)
                 {
-                    key->state = dither;
+                    key->state = in_click;
+                    key->hold_time = 0;
+                    key->interval_time = 0;
                 }
                 break;
             }
