@@ -7,7 +7,7 @@
 ## 使用方法
 
 - 将`easy_key.c`与`easy_key.h`加入到你的工程文件中
-- 
+
 - 按需修改`easy_key.h`文件中的宏
 
 >`USE_HAL_DRIVER`：是否使用hal库，如果使用第三方库将此值改为0
@@ -86,7 +86,7 @@
 
 编写代码时参考了 Zhewana 编写的 [CommonKey](https://github.com/Zhewana/CommonKey) 以及 [逐飞](https://gitee.com/seekfree) 的开源按键库
 
-感觉还有许多问题可以解决和优化，之后会慢慢更新的
+感觉还有许多问题可以解决和优化，比如代码不够精简之类的，之后会慢慢更新的
 
 等我有stm32板子之后可能会上传一份stm32版的按键库
 
