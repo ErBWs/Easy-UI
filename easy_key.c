@@ -107,7 +107,6 @@ void EasyKey_Handler()
         EasyKey_Sync(key);
 
         // Time counter
-        
         if (key->value & key->preval)
         {
             key->hold_time += key->timer;
@@ -144,8 +143,8 @@ void EasyKey_Handler()
                     {
                         key->state = pre_click;
                         key->click_count++;
-                        key->interval_time = 0;
                         key->hold_time = 0;
+		    	key->interval_time = 0;
                     }
                     else
                     {
