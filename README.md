@@ -75,7 +75,7 @@
 
 延时受到`INTERVAL_THRESHOLD`的影响
 
-不希望有延时的可以修改`EasyKey_Handler`或使用 Zhewana 编写的 [CommonKey](https://github.com/Zhewana/CommonKey)
+不希望有延时的可以修改`EasyKey_Handler`的内容
 
 ## 其他
 
