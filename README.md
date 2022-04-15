@@ -7,6 +7,7 @@
 ## 使用方法
 
 - 将`easy_key.c`与`easy_key.h`加入到你的工程文件中
+- 
 - 按需修改`easy_key.h`文件中的宏
 
 >`USE_HAL_DRIVER`：是否使用hal库，如果使用第三方库将此值改为0
@@ -18,7 +19,9 @@
 >`INTERVAL_THRESHOLD`：点击间隔时间，两次点击间隔低于此时间的点击会被认为是连点
 
 * 根据自己芯片的库文件修改`EasyKey_Sync`文件中的**读取GPIO口电平**函数
+
 * 根据自己芯片的库文件修改`EasyKey_Init`文件中的**GPIO初始化**方式
+
 * 根据需要改写回调函数(例如增加使用串口发送按键状态信息功能)
 
 >`EasyKey_PressCallback`：短按回调函数
