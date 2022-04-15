@@ -107,6 +107,7 @@ void EasyKey_Handler()
         EasyKey_Sync(key);
 
         // Time counter
+        
         if (key->value & key->preval)
         {
             key->hold_time += key->timer;
@@ -194,6 +195,7 @@ void EasyKey_Handler()
             case press:
             {
                 EasyKey_PressCallback(key);
+
                 if (!key->value)
                 {
                     key->state = release;
@@ -204,10 +206,9 @@ void EasyKey_Handler()
 
             case hold:
             {
-                EasyKey_HoldCallback(key);
-
                 if (!key->value)
                 {
+                    EasyKey_HoldCallback(key);
                     key->state = release;
                     key->hold_time = 0;
                 }
@@ -216,10 +217,9 @@ void EasyKey_Handler()
 
             case multi_click:
             {
-                EasyKey_MultiClickCallback(key);
-
                 if (key->interval_time > INTERVAL_THRESHOLD)
                 {
+                    EasyKey_MultiClickCallback(key);
                     key->state = release;
                     key->hold_time = 0;
                     key->interval_time = 0;
