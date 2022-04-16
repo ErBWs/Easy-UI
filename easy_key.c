@@ -107,14 +107,25 @@ void EasyKey_Handler()
         EasyKey_Sync(key);
 
         // Time counter
+        if(!key->value)
+        {
+            if(key->state != dither)
+            {
+                key->hold_time = 0;
+            }
+        }
         if (key->value & key->preval)
         {
             key->hold_time += key->timer;
         }
 
-        if (key->value == 0 && key->preval == 0)
+        if (key->state == pre_click | key->state == in_click)
         {
             key->interval_time += key->timer;
+        }
+        else
+        {
+            key->interval_time = 0;
         }
 
         // Events
@@ -143,13 +154,10 @@ void EasyKey_Handler()
                     {
                         key->state = pre_click;
                         key->click_count++;
-                        key->hold_time = 0;
-		    	key->interval_time = 0;
                     }
                     else
                     {
                         key->state = release;
-                        key->hold_time = 0;
                     }
                 }
                 break;
@@ -184,9 +192,6 @@ void EasyKey_Handler()
                 else
                 {
                     key->state = release;
-                    key->click_count = 0;
-                    key->hold_time = 0;
-                    key->interval_time = 0;
                 }
                 break;
             }
@@ -198,7 +203,6 @@ void EasyKey_Handler()
                 if (!key->value)
                 {
                     key->state = release;
-                    key->hold_time = 0;
                 }                
                 break;
             }  
@@ -209,7 +213,6 @@ void EasyKey_Handler()
                 {
                     EasyKey_HoldCallback(key);
                     key->state = release;
-                    key->hold_time = 0;
                 }
                 break;
             }
@@ -220,19 +223,14 @@ void EasyKey_Handler()
                 {
                     EasyKey_MultiClickCallback(key);
                     key->state = release;
-                    key->hold_time = 0;
-                    key->interval_time = 0;
-                    key->click_count = 0;
                 }
                 else if (!key->value)
                 {
                     key->state = in_click;
-                    key->hold_time = 0;
-                    key->interval_time = 0;
                 }
                 break;
             }
-
+            
             default:
                 break;
         }
