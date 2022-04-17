@@ -109,7 +109,7 @@ void EasyKey_Handler()
         // Time counter
         if(!key->value)
         {
-            if(key->state != dither && key->state != hold)
+            if(key->state != dither)
             {
                 key->hold_time = 0;
             }
@@ -200,7 +200,6 @@ void EasyKey_Handler()
             case press:
             {
                 EasyKey_PressCallback(key);
-
                 if (!key->value)
                 {
                     key->state = release;
