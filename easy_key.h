@@ -21,13 +21,14 @@ typedef struct EasyKey_typedef
 {
     uint8_t timer;              //Suggest using 10ms interrupt
     uint8_t value, preval;      // Press:1  Not press:0
-    uint32_t hold_time;
     uint32_t interval_time;
-    uint32_t click_count;
 
     GPIO_Init_Type init;
     GPIO_Type *GPIOX;
     struct EasyKey_typedef *next;
+
+    uint32_t hold_time;
+    uint32_t click_count;
 
     enum
     {
@@ -42,7 +43,6 @@ typedef struct EasyKey_typedef
         hold,
         multi_click
     } state;
-
 }EasyKey_t;
 
 void EasyKey_Init(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period);

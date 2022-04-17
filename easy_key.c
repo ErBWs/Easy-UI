@@ -109,7 +109,7 @@ void EasyKey_Handler()
         // Time counter
         if(!key->value)
         {
-            if(key->state != dither)
+            if(key->state != dither && key->state != hold)
             {
                 key->hold_time = 0;
             }
@@ -191,6 +191,7 @@ void EasyKey_Handler()
                 }
                 else
                 {
+                    EasyKey_MultiClickCallback(key);
                     key->state = release;
                 }
                 break;
@@ -206,7 +207,7 @@ void EasyKey_Handler()
                 }                
                 break;
             }  
-
+    
             case hold:
             {
                 if (!key->value)
@@ -219,12 +220,7 @@ void EasyKey_Handler()
 
             case multi_click:
             {
-                if (key->interval_time > INTERVAL_THRESHOLD)
-                {
-                    EasyKey_MultiClickCallback(key);
-                    key->state = release;
-                }
-                else if (!key->value)
+                if (!key->value)
                 {
                     key->state = in_click;
                 }
