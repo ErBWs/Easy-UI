@@ -109,7 +109,7 @@ void EasyKey_Handler()
         // Time counter
         if(!key->value)
         {
-            if(key->state != dither)
+            if(key->state != dither && key->state != hold)
             {
                 key->hold_time = 0;
             }
