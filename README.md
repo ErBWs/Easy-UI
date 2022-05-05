@@ -66,11 +66,11 @@
 >
 > `hold`：长按状态
 >
-> `multi_click`：连点状态
+> `multiClick`：连点状态
 
-在长按回调函数中调用`key.hold_time` / `key->hold_time`可获取**长按总持续时间**以供使用
+在长按回调函数中调用`key.holdTime` / `key->holdTime`可获取**长按总持续时间**以供使用
 
-在连点回调函数中调用`key.click_count` / `key->click_count`可获取**连点次数**以供使用
+在连点回调函数中调用`key.clickCnt` / `key->clickCnt`可获取**连点次数**以供使用
 
 * 想要获取并使用长按**总**持续时间和连点次数一定要通过**回调函数**获取！
 
