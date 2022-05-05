@@ -15,7 +15,7 @@
 //--------------------------------------------------------------------------
 __attribute__((weak)) void EasyKey_Sync(EasyKey_t *key)
 {
-    key->value = !GPIO_ReadInDataBit(key->GPIOX,key->init.Pins);
+    key->value = !GPIO_ReadInDataBit(key->GPIOX, key->init.Pins);
 
     // Don't modify this
     key->preval = key->value;
@@ -36,11 +36,12 @@ __attribute__((weak)) void EasyKey_HoldCallback(EasyKey_t *key)
 
 __attribute__((weak)) void EasyKey_MultiClickCallback(EasyKey_t *key)
 {
-    
+
 }
 //--------------------------------------------------------------------------
 
 
+EasyKey_t *head = NULL, *tail = NULL;
 /*
  * @brief       Key linked list init
  * @param       key         Linked list's node
@@ -50,42 +51,39 @@ __attribute__((weak)) void EasyKey_MultiClickCallback(EasyKey_t *key)
  * @return      void
  * @sample      key_init(&key1, 'G', 1, 10)     Init G1 as key input, 10ms scanner period
  */
-EasyKey_t *head = NULL, *tail = NULL;
-
 void EasyKey_Init(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period)
 {
     key->state = release;
     key->next = NULL;
     key->timer = period;
-    key->hold_time = 0;
-    key->interval_time = 0;
+    key->holdTime = 0;
+    key->intervalTime = 0;
     
 // Modify this part --------------------------------------------------------
-  #if USE_HAL_DRIVER
+#if USE_HAL_DRIVER
 
     // Enable RCC GPIO clock
-    RCC->AHB1ENR |= (1u << (pin&0xBF - 1));
+    RCC->AHB1ENR |= (1u << (pin & 0xBF - 1));
 
     // GPIO init
 	key->init.PinMode = GPIO_PinMode_In_PullUp;
 	key->init.Pins = (1u << num);
 	key->init.Speed = GPIO_Speed_50MHz;
-    key->GPIOX = ( (GPIO_Type*)(AHB1_2_BASE + (pin&0xBF - 1) * 1024) );
+    key->GPIOX = ( (GPIO_Type*)(AHB1_2_BASE + (pin & 0xBF - 1) * 1024) );
 	GPIO_Init(key->GPIOX, &key->init);
 
-  #elif
+#elif
 
     // Type your 3rd party driver here
 
-  #endif
+#endif
 //--------------------------------------------------------------------------
 
     if(head == NULL)
     {
         head = key;
         tail = key;
-    }
-    else
+    } else
     {
         tail->next = key;
         tail = tail->next;
@@ -111,21 +109,20 @@ void EasyKey_Handler()
         {
             if(key->state != dither && key->state != hold)
             {
-                key->hold_time = 0;
+                key->holdTime = 0;
             }
         }
         if (key->value & key->preval)
         {
-            key->hold_time += key->timer;
+            key->holdTime += key->timer;
         }
 
-        if (key->state == pre_click | key->state == in_click)
+        if (key->state == preClick | key->state == inClick)
         {
-            key->interval_time += key->timer;
-        }
-        else
+            key->intervalTime += key->timer;
+        } else
         {
-            key->interval_time = 0;
+            key->intervalTime = 0;
         }
 
         // Events
@@ -133,7 +130,7 @@ void EasyKey_Handler()
         {
             case release:
             {
-                key->click_count = 0;
+                key->clickCnt = 0;
 
                 if (key->value)
                 {
@@ -144,18 +141,17 @@ void EasyKey_Handler()
 
             case dither:
             {
-                if (key->hold_time > HOLD_THRESHOLD)
+                if (key->holdTime > HOLD_THRESHOLD)
                 {
                     key->state = hold;
                 }
                 if (!key->value)
                 {
-                    if (key->hold_time > PRESS_THRESHOLD && key->hold_time < HOLD_THRESHOLD)
+                    if (key->holdTime > PRESS_THRESHOLD && key->holdTime < HOLD_THRESHOLD)
                     {
-                        key->state = pre_click;
-                        key->click_count++;
-                    }
-                    else
+                        key->state = preClick;
+                        key->clickCnt++;
+                    } else
                     {
                         key->state = release;
                     }
@@ -163,14 +159,14 @@ void EasyKey_Handler()
                 break;
             }
 
-            case pre_click:
+            case preClick:
             {
-                if (key->interval_time < INTERVAL_THRESHOLD)
+                if (key->intervalTime < INTERVAL_THRESHOLD)
                 {
-                    if (key->hold_time > PRESS_THRESHOLD)
+                    if (key->holdTime > PRESS_THRESHOLD)
                     {
-                        key->state = multi_click;
-                        key->click_count++;
+                        key->state = multiClick;
+                        key->clickCnt++;
                     }
                     break;
                 }
@@ -179,17 +175,16 @@ void EasyKey_Handler()
                 break;
             }
 
-            case in_click:
+            case inClick:
             {
-                if (key->interval_time < INTERVAL_THRESHOLD)
+                if (key->intervalTime < INTERVAL_THRESHOLD)
                 {
-                    if (key->hold_time > PRESS_THRESHOLD)
+                    if (key->holdTime > PRESS_THRESHOLD)
                     {
-                        key->state = multi_click;
-                        key->click_count++;
+                        key->state = multiClick;
+                        key->clickCnt++;
                     }
-                }
-                else
+                } else
                 {
                     EasyKey_MultiClickCallback(key);
                     key->state = release;
@@ -217,11 +212,11 @@ void EasyKey_Handler()
                 break;
             }
 
-            case multi_click:
+            case multiClick:
             {
                 if (!key->value)
                 {
-                    key->state = in_click;
+                    key->state = inClick;
                 }
                 break;
             }
