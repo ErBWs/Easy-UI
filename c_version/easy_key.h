@@ -45,12 +45,12 @@ typedef struct EasyKey_typedef
     } state;
 } EasyKey_t;
 
-void EasyKey_Init(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period);
-void EasyKey_Handler();
+void EasyKeyInit(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period);
+void EasyKeyHandler();
 
-__attribute__((weak)) void EasyKey_Sync(EasyKey_t *key);
-__attribute__((weak)) void EasyKey_PressCallback(EasyKey_t *key);
-__attribute__((weak)) void EasyKey_HoldCallback(EasyKey_t *key);
-__attribute__((weak)) void EasyKey_MultiClickCallback(EasyKey_t *key);
+__attribute__((weak)) void SyncValue(EasyKey_t *key);
+__attribute__((weak)) void PressCallback(EasyKey_t *key);
+__attribute__((weak)) void HoldCallback(EasyKey_t *key);
+__attribute__((weak)) void MultiClickCallback(EasyKey_t *key);
 
 #endif

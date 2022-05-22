@@ -13,7 +13,7 @@
  * @note        Modify this part
  */
 //--------------------------------------------------------------------------
-__attribute__((weak)) void EasyKey_Sync(EasyKey_t *key)
+__attribute__((weak)) void SyncValue(EasyKey_t *key)
 {
     key->value = !GPIO_ReadInDataBit(key->GPIOX, key->init.Pins);
 
@@ -22,19 +22,19 @@ __attribute__((weak)) void EasyKey_Sync(EasyKey_t *key)
 }
 
 
-__attribute__((weak)) void EasyKey_PressCallback(EasyKey_t *key)
+__attribute__((weak)) void PressCallback(EasyKey_t *key)
 {
     
 }
 
 
-__attribute__((weak)) void EasyKey_HoldCallback(EasyKey_t *key)
+__attribute__((weak)) void HoldCallback(EasyKey_t *key)
 {
     
 }
 
 
-__attribute__((weak)) void EasyKey_MultiClickCallback(EasyKey_t *key)
+__attribute__((weak)) void MultiClickCallback(EasyKey_t *key)
 {
 
 }
@@ -51,7 +51,7 @@ EasyKey_t *head = NULL, *tail = NULL;
  * @return      void
  * @sample      key_init(&key1, 'G', 1, 10)     Init G1 as key input, 10ms scanner period
  */
-void EasyKey_Init(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period)
+void EasyKeyInit(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period)
 {
     key->state = release;
     key->next = NULL;
@@ -97,33 +97,26 @@ void EasyKey_Init(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period)
  * @return      void
  * @note        Don't modify
  */
-void EasyKey_Handler()
+void EasyKeyHandler()
 {
     for (EasyKey_t *key = head; key != NULL; key = key->next)
     {
         // Get key value
-        EasyKey_Sync(key);
+        SyncValue(key);
 
         // Time counter
         if(!key->value)
         {
             if(key->state != dither && key->state != hold)
-            {
                 key->holdTime = 0;
-            }
         }
         if (key->value & key->preval)
-        {
             key->holdTime += key->timer;
-        }
 
         if (key->state == preClick | key->state == inClick)
-        {
             key->intervalTime += key->timer;
-        } else
-        {
+        else
             key->intervalTime = 0;
-        }
 
         // Events
         switch (key->state)
@@ -133,18 +126,15 @@ void EasyKey_Handler()
                 key->clickCnt = 0;
 
                 if (key->value)
-                {
                     key->state = dither;
-                }
                 break;
             }
 
             case dither:
             {
                 if (key->holdTime > HOLD_THRESHOLD)
-                {
                     key->state = hold;
-                }
+
                 if (!key->value)
                 {
                     if (key->holdTime > PRESS_THRESHOLD && key->holdTime < HOLD_THRESHOLD)
@@ -186,7 +176,7 @@ void EasyKey_Handler()
                     }
                 } else
                 {
-                    EasyKey_MultiClickCallback(key);
+                    MultiClickCallback(key);
                     key->state = release;
                 }
                 break;
@@ -194,11 +184,9 @@ void EasyKey_Handler()
 
             case press:
             {
-                EasyKey_PressCallback(key);
+                PressCallback(key);
                 if (!key->value)
-                {
                     key->state = release;
-                }                
                 break;
             }  
     
@@ -206,7 +194,7 @@ void EasyKey_Handler()
             {
                 if (!key->value)
                 {
-                    EasyKey_HoldCallback(key);
+                    HoldCallback(key);
                     key->state = release;
                 }
                 break;
@@ -215,9 +203,7 @@ void EasyKey_Handler()
             case multiClick:
             {
                 if (!key->value)
-                {
                     key->state = inClick;
-                }
                 break;
             }
             
