@@ -1,6 +1,6 @@
 # Easy-Key
 
-A key driver based on hal diver of MindMotion, support short press, hold and multiclick
+A key driver based on hal diver of MindMotion, support short press, hold and multi click
 
 ### [中文](./README_CN.md)
 
@@ -18,7 +18,7 @@ A key driver based on hal diver of MindMotion, support short press, hold and mul
 >
 >`HOLD_THRESHOLD`：Hold threshold, press time longer than this is considered as "hold"
 >
->`INTERVAL_THRESHOLD`：Time between two click, time less than this is considered as "multiclick"
+>`INTERVAL_THRESHOLD`：Time between two click, time less than this is considered as "multi click"
 
 * Change the **read GPIO pin level** function in `SyncValue` according to your mcu
 
@@ -68,7 +68,7 @@ Use `key.state` (C/C++) / `key->state` (C/C++) to get key state，the following 
 >
 > `hold`：hold state
 >
-> `multiClick`：multiclick state
+> `multiClick`：multi click state
 
 Call `key.holdTime` (C/C++) / `key->holdTime` (C/C++) in **hold callback** can have access to **total hold time**
 
@@ -86,9 +86,9 @@ If you want no delay, change the `EasyKeyHandler` (C++: `EasyKey::Handler`) func
 
 ## Other
 
-Thank for Zhewana's [CommonKey](https://github.com/Zhewana/CommonKey) and Seekfree's [Opensource key driver](https://gitee.com/seekfree)
+Thanks for Zhewana's [CommonKey](https://github.com/Zhewana/CommonKey) and Seekfree's [Opensource key driver](https://gitee.com/seekfree)
 
-I will keep undating this driver
+I will keep updating this driver
 
 There will probably be a stm32 version of this driver when I get one stm32 board
 
