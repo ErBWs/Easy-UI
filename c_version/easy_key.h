@@ -14,8 +14,8 @@
 
 #define USE_HAL_DRIVER 1        // If you use 3rd party driver, change this def to 0
 #define PRESS_THRESHOLD 10      // Dithering elimination
-#define HOLD_THRESHOLD 200      // Time longer than this will be considered as "hold"
-#define INTERVAL_THRESHOLD 150  // Trigger time interval less than this will be considered as "multi_click"
+#define HOLD_THRESHOLD 200      // Time longer than this is considered as "hold"
+#define INTERVAL_THRESHOLD 150  // Trigger time interval less than this is considered as "multiclick"
 
 typedef struct EasyKey_typedef
 {

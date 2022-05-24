@@ -31,8 +31,8 @@ private:
     GPIO_Type *GPIOX;
 
     static const uint32_t PRESS_THRESHOLD = 10;        // Dithering elimination
-    static const uint32_t HOLD_THRESHOLD = 200;        // Time longer than this will be considered as "hold"
-    static const uint32_t INTERVAL_THRESHOLD = 150;    // Trigger time interval less than this will be considered as "multi_click"
+    static const uint32_t HOLD_THRESHOLD = 200;        // Time longer than this is considered as "hold"
+    static const uint32_t INTERVAL_THRESHOLD = 150;    // Trigger time interval less than this is considered as "multiclick"
 
 public:
     EasyKey(uint32_t _pin, uint8_t _num, uint8_t _period);

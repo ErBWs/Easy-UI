@@ -1,93 +1,95 @@
 # Easy-Key
 
-基于灵动Hal库编写的一个按键库，支持短按、长按和连点
+A key driver based on hal diver of MindMotion, support short press, hold and multiclick
 
+## [中文](./README_CN.md)
 
+>Unless stated, all refer to the C version of key dirver
 
-## 使用方法
+## User manual
 
-- 将`easy_key.c`与`easy_key.h`加入到工程文件中
+- Adding files to your projects according to your language
 
-- 按需修改`easy_key.h`文件中的宏
+- Modify definitions or constants(C++) in`easy_key.h`
 
->`USE_HAL_DRIVER`：是否使用hal库，如果使用第三方库将此值改为0
+>`USE_HAL_DRIVER`：Use hal or not, if you use 3rd party driver, change this to 0
 >
->`PRESS_THRESHOLD`：消抖检测时间，低于此时间的点击会被认为是抖动
+>`PRESS_THRESHOLD`：Dithering elimination, press time less than this is considered dithering
 >
->`HOLD_THRESHOLD`：长按检测时间，长于此时间的点击会被认为是长按
+>`HOLD_THRESHOLD`：Hold threshold, press time longer than this is considered as "hold"
 >
->`INTERVAL_THRESHOLD`：点击间隔时间，两次点击间隔低于此时间的点击会被认为是连点
+>`INTERVAL_THRESHOLD`：Time between two click, time less than this is considered as "multiclick"
 
-* 根据自己芯片的库文件修改`EasyKey_Sync`函数中的**读取GPIO口电平**函数
+* Change the **read GPIO pin level** function in `SyncValue` according to your mcu
 
-* 根据自己芯片的库文件修改`EasyKey_Init`函数中的**GPIO初始化**方式
+* Change the **GPIO initialization** function in `EasyKeyInit` (C++: `EasyKey::EasyKey`) according to your mcu
 
-* 根据需要改写回调函数(例如增加使用串口发送按键状态信息功能)
+* Modify the callback function (e.g. Send key state using UART)
 
->`EasyKey_PressCallback`：短按回调函数
+>`PressCallback`：Short press callback function
 >
->`EasyKey_HoldCallback`：长按回调函数
+>`HoldCallback`：Hold callback function
 >
->`EasyKey_MultiClickCallback`：连点回调函数
+>`MultiClickCallback`：Multiclick callback function
 
-* 为**每一个按键**定义一个`EasyKey_t`句柄
+* Use `EasyKey_t` to define **all the keys**
 
-* 为**每一个按键**调用`EasyKey_Init`函数
+* Call `EasyKeyInit` function for **all the keys**
 
-* 使用**定时器中断**调用`EasyKey_Handler`函数，我个人推荐中断使用**10ms**触发一次
+>(C++)For C++ version，you only need to call `EasyKey::EasyKey` function for **all the keys**
 
+* Call `EasyKey_Handler` (C++: `EasyKey::Handler`) function in **timer interrupt**, recommend **10ms**
 
+## Note
 
-## 说明
+### Interface function migration
 
-### 接口函数移植
+When key is pressed, the pin level should be **high**
 
-按键触发时GPIO口电平应为**高电平**
+When you find it not work, try **not** to use `EasyKey_t *`,
 
-如果发现不能使用可以尝试定义句柄时**不使用**`EasyKey_t *`;
+use `&key` when initializing with `EasyKeyInit`
 
-而在`EasyKey_Init`初始化时使用`&key`
+### Use 3rd party library
 
-### 使用第三方库
+Change `USE_HAL_DRIVER` to 0
 
-修改`USE_HAL_DRIVER`的值为0
+Type your 3rd party driver at `Type your 3rd party driver here` annotation
 
-在`Type your 3rd party driver here`注释处键入第三方库GPIO初始化函数
+Modify the parameter of `EasyKeyInit` (C++: `EasyKey::EasyKey`) (if needed)
 
-修改`EasyKey_Init`的函数参数(如果需要)
+### Get key state
 
-### 获取按键状态
+Recommend using **timer interrupt** with **same trigger time** to get key state
 
-建议使用**触发时间相同**的**定时器中断**获取按键状态
+Use `key.state` (C/C++) / `key->state` (C/C++) to get key state，the following three are for the user：
 
-使用`key.state` / `key->state`获取值即可，其中供用户使用的值为**最后三个**：
-
-> `press`：短按状态
+> `press`：short press state
 >
-> `hold`：长按状态
+> `hold`：hold state
 >
-> `multiClick`：连点状态
+> `multiClick`：multiclick state
 
-在长按回调函数中调用`key.holdTime` / `key->holdTime`可获取**长按总持续时间**以供使用
+Call `key.holdTime` (C/C++) / `key->holdTime` (C/C++) in **hold callback** can have access to **total hold time**
 
-在连点回调函数中调用`key.clickCnt` / `key->clickCnt`可获取**连点次数**以供使用
+Call `key.clickCnt` (C/C++) / `key->clickCnt` (C/C++) in **multiclick callback** can have access to **total click counts**
 
-* 想要获取并使用长按**总**持续时间和连点次数一定要通过**回调函数**获取！
+* **Total** hold time and click counts **have** to be obtained by using **callback function**!
 
-### 点按延时
+### Short press delay
 
-触发短按状态会有延时，因为要检测是否为连点，这样的好处是触发连点前不会触发短按
+There are delay when detecting short press delay due to the need of multiclick detection,
 
-延时受到`INTERVAL_THRESHOLD`的影响
+the delay time is influenced by `INTERVAL_THRESHOLD`
 
-不希望有延时的可以修改`EasyKey_Handler`的内容
+If you want no delay, change the `EasyKeyHandler` (C++: `EasyKey::Handler`) function
 
-## 其他
+## Other
 
-编写代码时参考了 Zhewana 编写的 [CommonKey](https://github.com/Zhewana/CommonKey) 以及 [逐飞](https://gitee.com/seekfree) 的开源按键库
+Thank for Zhewana's [CommonKey](https://github.com/Zhewana/CommonKey) and Seekfree's [Opensource key driver](https://gitee.com/seekfree)
 
-感觉还有许多问题可以解决和优化，之后会慢慢更新的
+I will keep undating this driver
 
-等我有stm32板子之后可能会上传一份stm32版的按键库
+There will probably be a stm32 version of this driver when I get one stm32 board
 
-代码仅经过初步验证，尚未经过实例验证，稳定性可能不是很好，欢迎大家提交修改或建议
+Comments or suggestions are welcomed
