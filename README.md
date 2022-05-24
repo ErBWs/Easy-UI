@@ -4,7 +4,7 @@ A key driver based on hal diver of MindMotion, support short press, hold and mul
 
 ### [中文](./README_CN.md)
 
->Unless stated, all refer to the C version of key dirver
+>Unless stated, all refer to the C version of key driver
 
 ## User manual
 
@@ -30,7 +30,7 @@ A key driver based on hal diver of MindMotion, support short press, hold and mul
 >
 >`HoldCallback`：Hold callback function
 >
->`MultiClickCallback`：Multiclick callback function
+>`MultiClickCallback`：Multi click callback function
 
 * Use `EasyKey_t` to define **all the keys**
 
@@ -72,13 +72,13 @@ Use `key.state` (C/C++) / `key->state` (C/C++) to get key state，the following 
 
 Call `key.holdTime` (C/C++) / `key->holdTime` (C/C++) in **hold callback** can have access to **total hold time**
 
-Call `key.clickCnt` (C/C++) / `key->clickCnt` (C/C++) in **multiclick callback** can have access to **total click counts**
+Call `key.clickCnt` (C/C++) / `key->clickCnt` (C/C++) in **multi click callback** can have access to **total click counts**
 
 * **Total** hold time and click counts **have** to be obtained by using **callback function**!
 
 ### Short press delay
 
-There are delay when detecting short press delay due to the need of multiclick detection,
+There are delay when detecting short press delay due to the need of multi click detection,
 
 the delay time is influenced by `INTERVAL_THRESHOLD`
 
