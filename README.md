@@ -2,7 +2,7 @@
 
 A key driver based on hal diver of MindMotion, support short press, hold and multiclick
 
-## [中文](./README_CN.md)
+### [中文](./README_CN.md)
 
 >Unless stated, all refer to the C version of key dirver
 
