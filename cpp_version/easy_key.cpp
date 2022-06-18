@@ -35,7 +35,7 @@ EasyKey::EasyKey(uint32_t _pin, uint8_t _num, uint8_t _period)
     GPIOX = ((GPIO_Type *)(AHB1_2_BASE + (_pin & 0xBF - 1) * 1024));
     GPIO_Init(GPIOX, &init);
 
-#elif
+#else
 
     // Type your 3rd party driver here
 
