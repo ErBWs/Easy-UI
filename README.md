@@ -48,11 +48,11 @@
 
 ### 主界面
 
-![](/Users/baohan/ErBW_s/Projects/Easy-UI/4.Photos/2.Main.jpg)
+![](4.Photos/2.Main.jpg)
 
 ### 多选框界面
 
-![](/Users/baohan/ErBW_s/Projects/Easy-UI/4.Photos/3.Checkbox.jpg)
+![](4.Photos/3.Checkbox.jpg)
 
 ### 单选框界面（同一时刻只有一个能被选中）
 
