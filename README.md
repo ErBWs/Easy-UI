@@ -1,95 +1,67 @@
-# Easy-Key
+# Easy-UI
 
-A key driver based on hal diver of MindMotion, support short press, hold and multi click
+基于魔改的逐飞屏幕驱动，拙劣地模仿了稚晖君的[MonoUI](https://www.youtube.com/watch?v=44RmDMXcU9s&ab_channel=%E7%A8%9A%E6%99%96%E5%90%9B)实现方式，参考了createskyblue的[OpenT12](https://gitee.com/createskyblue/OpenT12)项目UI所编写的一个UI。
 
-### [中文](./README_CN.md)
+## 样例
 
->Unless stated, all refer to the C version of key driver
+[点这里](./3.Example/menu.c)
 
-## User manual
+## 实现方式浅析
 
-- Adding files to your projects according to your language
+### 框架实现
 
-- Modify definitions or constants(C++) in`easy_key.h`
+菜单页面、项目、按键实现均采用**链表**方式，理论可无限扩展；
 
->`USE_HAL_DRIVER`：Use hal or not, if you use 3rd party driver, change this to 0
+`AddItem` / `AddPage` 采用**可变参数函数**实现，实现输入不同`func`时获取不同的后续参数以初始化菜单。
+
+### 屏幕驱动魔改 / 掉电存储
+
+在逐飞的IPS114屏幕驱动基础上增加**缓冲区**，删除断言函数改为`break`处理；
+
+参照`u8g2`增加部分显示函数，如`绘制圆角方框`等；
+
+增加可设置颜色模式，支持正常与异或绘制，用以绘制反色指示器等；
+
+每次系统初始化时判断`flash`内相应区域是否为空，若非空则读取一次数据。
+
+> ‼️每次增减菜单结构请先**擦除全片**再进行烧录
 >
->`PRESS_THRESHOLD`：Dithering elimination, press time less than this is considered dithering
->
->`HOLD_THRESHOLD`：Hold threshold, press time longer than this is considered as "hold"
->
->`INTERVAL_THRESHOLD`：Time between two click, time less than this is considered as "multi click"
+> 此部分仅部分开源，完整代码后续会在工程项目中开源
 
-* Change the **read GPIO pin level** function in `SyncValue` according to your mcu
+## 相对MonoUI的一些更改
 
-* Change the **GPIO initialization** function in `EasyKeyInit` (C++: `EasyKey::EasyKey`) according to your mcu
+### 进度条
 
-* Modify the callback function (e.g. Send key state using UART)
+为了实现变量值修改时可**更改步长**，适配不同数量按键时统一的一套**保存/放弃修改**操作，我放弃了进度条的实现，更改后界面如下：
 
->`PressCallback`：Short press callback function
->
->`HoldCallback`：Hold callback function
->
->`MultiClickCallback`：Multi click callback function
+![](4.Photos/6.ChangeValue.jpg)
 
-* Use `EasyKey_t` to define **all the keys**
+### 导航条
 
-* Call `EasyKeyInit` function for **all the keys**
+导航条原来是显示该页面所具有的**栏目数量及当前所在栏目**，但若**栏目众多**或**屏幕像素高度 / 栏目数量**的结果不为整数时出来的效果我感觉不尽如人意，因此我将其更改为与反色指示器具有相同的位置计算，仅显示**当前屏幕上指示器所在位置**，也在一定程度上方便了在宽屏上，使用者一一对应左侧标题右侧状态的难易度。
 
->(C++)For C++ version，you only need to call `EasyKey::EasyKey` function for **all the keys**
+## 部分菜单界面一览
 
-* Call `EasyKey_Handler` (C++: `EasyKey::Handler`) function in **timer interrupt**, recommend **10ms**
+### 初始界面
 
-## Note
+![](4.Photos/1.Welcome.jpg)
 
-### Interface function migration
+### 主界面
 
-When key is pressed, the pin level should be **high**
+![](/Users/baohan/ErBW_s/Projects/Easy-UI/4.Photos/2.Main.jpg)
 
-When you find it not work, try **not** to use `EasyKey_t *`,
+### 多选框界面
 
-use `&key` when initializing with `EasyKeyInit`
+![](/Users/baohan/ErBW_s/Projects/Easy-UI/4.Photos/3.Checkbox.jpg)
 
-### Use 3rd party library
+### 单选框界面（同一时刻只有一个能被选中）
 
-Change `USE_HAL_DRIVER` to 0
+![](4.Photos/4.RadioButton.jpg)
 
-Type your 3rd party driver at `Type your 3rd party driver here` annotation
+### 开关界面
 
-Modify the parameter of `EasyKeyInit` (C++: `EasyKey::EasyKey`) (if needed)
+![](4.Photos/5.Switch.jpg)
 
-### Get key state
+### 消息框绘制
 
-Recommend using **timer interrupt** with **same trigger time** to get key state
-
-Use `key.state` (C/C++) / `key->state` (C/C++) to get key state，the following three are for the user：
-
-> `press`：short press state
->
-> `hold`：hold state
->
-> `multiClick`：multi click state
-
-Call `key.holdTime` (C/C++) / `key->holdTime` (C/C++) in **hold callback** can have access to **total hold time**
-
-Call `key.clickCnt` (C/C++) / `key->clickCnt` (C/C++) in **multi click callback** can have access to **total click counts**
-
-* **Total** hold time and click counts **have** to be obtained by using **callback function**!
-
-### Short press delay
-
-There are delay when detecting short press delay due to the need of multi click detection,
-
-the delay time is influenced by `INTERVAL_THRESHOLD`
-
-If you want no delay, change the `EasyKeyHandler` (C++: `EasyKey::Handler`) function
-
-## Other
-
-Thanks for Zhewana's [CommonKey](https://github.com/Zhewana/CommonKey) and Seekfree's [Opensource key driver](https://gitee.com/seekfree)
-
-I will keep updating this driver
-
-There will probably be a stm32 version of this driver when I get one stm32 board
-
-Comments or suggestions are welcomed
+![](4.Photos/7.MessageBox.jpg)
