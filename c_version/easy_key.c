@@ -72,7 +72,7 @@ void EasyKeyInit(EasyKey_t *key, uint32_t pin, uint8_t num, uint8_t period)
     key->GPIOX = ( (GPIO_Type*)(AHB1_2_BASE + (pin & 0xBF - 1) * 1024) );
 	GPIO_Init(key->GPIOX, &key->init);
 
-#elif
+#else
 
     // Type your 3rd party driver here
 
