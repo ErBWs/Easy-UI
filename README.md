@@ -1,6 +1,6 @@
 # Easy-UI
 
-基于魔改的逐飞屏幕驱动，拙劣地模仿了稚晖君的[MonoUI](https://www.youtube.com/watch?v=44RmDMXcU9s&ab_channel=%E7%A8%9A%E6%99%96%E5%90%9B)实现方式，参考了createskyblue的[OpenT12](https://gitee.com/createskyblue/OpenT12)项目UI所编写的一个UI。
+基于魔改的逐飞屏幕驱动，拙劣地模仿了稚晖君的[MonoUI](https://www.youtube.com/watch?v=44RmDMXcU9s&ab_channel=%E7%A8%9A%E6%99%96%E5%90%9B)实现方式，参考了 [createskyblue](https://gitee.com/createskyblue) / [OpenT12 ](https://gitee.com/createskyblue/OpenT12)项目UI所编写的一个UI。其中的按键库参考了 [Zhewana](https://github.com/Zhewana) / [CommonKey](https://github.com/Zhewana/CommonKey) 开源按键库，该按键库的链表结构给了我很大的启发。
 
 ## 样例
 
