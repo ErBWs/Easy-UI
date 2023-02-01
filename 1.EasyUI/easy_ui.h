@@ -25,8 +25,6 @@ extern "C"
 #include <stdarg.h>
 #include <stdbool.h>
 
-#include "menu.h"
-
 // Modify this to fit your EasyKeyInit
 #define KEY_UP          C7
 #define KEY_DOWN        C6
@@ -54,30 +52,36 @@ extern uint8_t opnEnter, opnExit, opnUp, opnDown;
 #define ITEM_LINES              ((uint8_t)(SCREEN_HEIGHT / ITEM_HEIGHT))
 
 // Represent the time it takes to play the animation, smaller the quicker. Unit: ms
-#define INDICATOR_MOVE_TIME     60
-#define ITEM_MOVE_TIME          60
+#define INDICATOR_MOVE_TIME     50
+#define ITEM_MOVE_TIME          50
 
 #define EasyUIScreenInit()                                      (ips114_init())
 #define EasyUIDisplayStr(x, y, str)                             (IPS114_ShowStr(x, y, str))
 #define EasyUIDisplayFloat(x, y, dat, num, pointNum)            (IPS114_ShowFloat(x, y, dat, num, pointNum))
 #define EasyUIDrawDot(x, y, color)                              (IPS114_DrawPoint(x, y, color))
 #define EasyUIDrawBox(x, y, width, height, color)               (IPS114_DrawBox(x, y, width, height, color))
-#define EasyUIDrawRFrame(x, y, width, height, color)            (IPS114_DrawRFrame(x, y, width, height, color))
-#define EasyUIDrawRBox(x, y, width, height, color)              (IPS114_DrawRBox(x, y, width, height, color))
-#define EasyUIDrawCheckbox(x, y, size, offset, value)           (IPS114_DrawCheckbox(x, y, size, offset, value))
+#define EasyUIDrawFrame(x, y, width, height, color)             (IPS114_DrawFrame(x, y, width, height, color))
+#define EasyUIDrawRFrame(x, y, width, height, color, r)         (IPS114_DrawRFrame(x, y, width, height, color, r))
+#define EasyUIDrawRBox(x, y, width, height, color, r)           (IPS114_DrawRBox(x, y, width, height, color, r))
 #define EasyUIClearBuffer()                                     (IPS114_ClearBuffer())
 #define EasyUISendBuffer()                                      (IPS114_SendBuffer())
 #define EasyUISetDrawColor(mode)                                (IPS114_SetDrawColor(mode))
 #define EasyUIDisplayBMP(x, y, width, height, pic)              (IPS114_ShowBMP(x, y, width, height, pic))
 #define EasyUIModifyColor()                                     (IPS114_ModifyColor())
 
+#ifdef FPU
+typedef     double      paramType;
+#else
+typedef     int32_t     paramType;
+#endif
+
 typedef enum
 {
     ITEM_PAGE_DESCRIPTION,
     ITEM_JUMP_PAGE,
-    ITEM_CALL_FUNCTION,
     ITEM_SWITCH,
     ITEM_CHANGE_VALUE,
+    ITEM_PROGRESS_BAR,
     ITEM_RADIO_BUTTON,
     ITEM_CHECKBOX,
     ITEM_MESSAGE
@@ -104,11 +108,11 @@ typedef struct EasyUI_item
     char *msg;                                  // ITEM_MESSAGE
     bool *flag;                                 // ITEM_CHECKBOX and ITEM_RADIO_BUTTON and ITEM_SWITCH
     bool flagDefault;                           // Factory default setting
-    double *param;                              // ITEM_CHANGE_VALUE
-    double paramDefault;                        // Factory default setting
-    double paramBackup;                         // ITEM_CHANGE_VALUE
+    paramType *param;                           // ITEM_CHANGE_VALUE and ITEM_PROGRESS_BAR
+    paramType paramDefault;                     // Factory default setting
+    paramType paramBackup;                      // ITEM_CHANGE_VALUE and ITEM_PROGRESS_BAR
     uint8_t pageId;                             // ITEM_JUMP_PAGE
-    void (*Event)(struct EasyUI_item *item);    // ITEM_CALL_FUNCTION and ITEM_CHANGE_VALUE
+    void (*Event)(struct EasyUI_item *item);    // ITEM_CHANGE_VALUE and ITEM_PROGRESS_BAR
 } EasyUIItem_t;
 
 typedef struct EasyUI_page
@@ -122,7 +126,8 @@ typedef struct EasyUI_page
     void (*Event)(struct EasyUI_page *page);
 } EasyUIPage_t;
 
-extern bool functionIsRunning;
+extern char *EasyUIVersion;
+extern bool functionIsRunning, listLoop;
 extern EasyUIPage_t *pageHead, *pageTail;
 
 void EasyUIAddItem(EasyUIPage_t *page, EasyUIItem_t *item, char *_title, EasyUIItem_e func, ...);
