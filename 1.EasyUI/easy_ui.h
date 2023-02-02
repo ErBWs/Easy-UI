@@ -50,6 +50,7 @@ extern uint8_t opnEnter, opnExit, opnUp, opnDown;
 #define ITEM_HEIGHT             16
 #define SCROLL_BAR_WIDTH        4
 #define ITEM_LINES              ((uint8_t)(SCREEN_HEIGHT / ITEM_HEIGHT))
+#define MAX_LAYER               10
 
 // Represent the time it takes to play the animation, smaller the quicker. Unit: ms
 #define INDICATOR_MOVE_TIME     50
@@ -72,7 +73,7 @@ extern uint8_t opnEnter, opnExit, opnUp, opnDown;
 #ifdef FPU
 typedef     double      paramType;
 #else
-typedef     int32_t     paramType;
+typedef     int64_t     paramType;
 #endif
 
 typedef enum
