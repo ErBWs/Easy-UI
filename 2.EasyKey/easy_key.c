@@ -7,73 +7,121 @@
 
 #include "easy_key.h"
 
+bool multiClickSwitch = false;
+EasyKey_t *head = NULL, *tail = NULL;
+
 /*!
- * @brief       Callback
- * @param       *key        Key linked list
- * @return      void
- * @note        Modify this part
+ * @brief   Callbacks
+ *
+ * @param   key         Key linked list
+ * @return  void
+ *
+ * @note    Modify this part
  */
-//--------------------------------------------------------------------------
-__attribute__((weak)) void SyncValue(EasyKey_t *key)
+void PressCallback(EasyKey_t *key)
 {
-    key->value = !gpio_get_level(key->pin);
-
-    // Don't modify this
-    key->preVal = key->value;
-}
-
-
-__attribute__((weak)) void PressCallback(EasyKey_t *key)
-{
+    key->isMultiClick = false;
     key->isPressed = true;
+    key->isHold = false;
 }
-
-
-__attribute__((weak)) void HoldCallback(EasyKey_t *key)
+void HoldCallback(EasyKey_t *key)
 {
+    key->isMultiClick = false;
+    key->isPressed = false;
     key->isHold = true;
 }
-
-
-__attribute__((weak)) void MultiClickCallback(EasyKey_t *key)
+void MultiClickCallback(EasyKey_t *key)
 {
     key->isMultiClick = true;
+    key->isPressed = false;
+    key->isHold = false;
 }
-
-
-__attribute__((weak)) void ReleaseCallback(EasyKey_t *key)
+void ReleaseCallback(EasyKey_t *key)
 {
     key->isMultiClick = false;
     key->isPressed = false;
     key->isHold = false;
 }
-//--------------------------------------------------------------------------
 
 
-EasyKey_t *head = NULL, *tail = NULL;
+/*!
+ * @brief   EasyKey user app
+ *
+ * @param   void
+ * @return  void
+ *
+ * @note    Modify this part
+ */
+void EasyKeyUserApp()
+{
+    for (EasyKey_t *key = head; key != NULL; key = key->next)
+    {
+        ReleaseCallback(key);
+
+        // Press and hold callback
+        if (key->state == up && key->holdTime >= HOLD_THRESHOLD_MS)
+            HoldCallback(key);
+        if (key->state == up && key->holdTime < HOLD_THRESHOLD_MS)
+        {
+            if (multiClickSwitch == false)
+            {
+                PressCallback(key);
+                continue;
+            }
+            if (key->clickState == 0)
+                key->clickState = 1;
+        }
+
+        // Skip multiple click judgement
+        if (multiClickSwitch == false)
+        {
+            continue;
+        }
+
+        /*
+         * clickState = 0: Normal state
+         * clickState = 1: Waiting for multiple click
+         * clickState = 2: Interval time meet multiple click requirement, and need to judge hold time
+         */
+        if (key->clickState == 1 && key->state == down && key->intervalTime < INTERVAL_THRESHOLD_MS)
+        {
+            // Enter click state 2
+            key->clickState = 2;
+        }
+        if (key->clickState == 1 && key->intervalTime > INTERVAL_THRESHOLD_MS)
+        {
+            // Interval time too long, trigger PressCallBack
+            PressCallback(key);
+            key->clickState = 0;
+        }
+        if (key->clickState == 2 && key->state == up && key->holdTime < HOLD_THRESHOLD_MS)
+        {
+            // Meet all requirements, trigger MultiClickCallBack
+            MultiClickCallback(key);
+            key->clickState = 0;
+        }
+    }
+}
+
+
 /*!
  * @brief       Key linked list init
+ *
  * @param       key         Linked list's node
- * @param       pin         Gpio pin
- * @param       num         Gpio num
- * @param       period      Scanner period(ms), should be the same as the Timer period
+ * @param       _pin        Gpio pin
  * @return      void
- * @sample      key_init(&key1, 'G', 1, 10)     Init G1 as key input, 10ms scanner period
  */
 void EasyKeyInit(EasyKey_t *key, gpio_pin_enum _pin)
 {
-    key->state = release;
+    key->state = released;
     key->next = NULL;
     key->holdTime = 0;
     key->intervalTime = 0;
     key->pin = _pin;
-    
-// Modify this part --------------------------------------------------------
+    key->preValue = 1;
 
-    // Type your 3rd party driver here
+    // GPIO init
     gpio_init(_pin, GPI, 0,GPI_PULL_UP);
-
-//--------------------------------------------------------------------------
 
     if(head == NULL)
     {
@@ -87,129 +135,74 @@ void EasyKeyInit(EasyKey_t *key, gpio_pin_enum _pin)
 }
 
 
-uint8_t multiClickSwitch = 0;
 /*!
- * @brief       Key interrupt handler
- * @param       void
- * @return      void
- * @note        Don't modify
+ * @brief   Dither elimination
+ *
+ * @param   timeUs      Delay time(us)
+ * @return  void
  */
-void EasyKeyHandler(uint8_t timer)
+void DebounceFilter(uint8_t timeUs)
 {
     for (EasyKey_t *key = head; key != NULL; key = key->next)
     {
-        // Get key value
-        SyncValue(key);
+        key->cacheValue = gpio_get_level(key->pin);
+    }
+
+    system_delay_us(timeUs);
+
+    uint8_t mask;
+    for (EasyKey_t *key = head; key != NULL; key = key->next)
+    {
+        key->value = gpio_get_level(key->pin);
+        mask = key->value ^ key->cacheValue;
+        key->value |= mask;
+    }
+}
+
+
+/*!
+ * @brief       Update key state
+ *
+ * @param       void
+ * @return      void
+ */
+void EasyKeyScanKeyState()
+{
+    DebounceFilter(FILTER_TIME_US);
+
+    for (EasyKey_t *key = head; key != NULL; key = key->next)
+    {
+        // Update key state
+        if (key->preValue > key->value)
+            key->state = down;
+        else if (key->preValue < key->value)
+            key->state = up;
+        else if (key->value == 0)
+            key->state = pressed;
+        else
+            key->state = released;
 
         // Time counter
-        if(!key->value)
-        {
-            if(key->state != dither && key->state != hold)
-                key->holdTime = 0;
-        }
-        if (key->value & key->preVal)
-            key->holdTime += timer;
-
-        if (key->state == preClick | key->state == inClick)
-            key->intervalTime += timer;
-        else
-            key->intervalTime = 0;
-
-        // Events
         switch (key->state)
         {
-            case release:
-            {
-                ReleaseCallback(key);
-                key->clickCnt = 0;
-
-                if (key->value)
-                    key->state = dither;
-                break;
-            }
-
-            case dither:
-            {
-                if (key->holdTime > HOLD_THRESHOLD)
-                    key->state = hold;
-
-                if (!key->value)
-                {
-                    if (key->holdTime > PRESS_THRESHOLD && key->holdTime < HOLD_THRESHOLD)
-                    {
-                        key->state = preClick;
-                        key->clickCnt++;
-                    } else
-                    {
-                        key->state = release;
-                    }
-                }
-                break;
-            }
-
-            case preClick:
-            {
-                if (multiClickSwitch)
-                {
-                    if (key->intervalTime < INTERVAL_THRESHOLD)
-                    {
-                        if (key->holdTime > PRESS_THRESHOLD)
-                        {
-                            key->state = multiClick;
-                            key->clickCnt++;
-                        }
-                        break;
-                    }
-                }
-
-                key->state = press;
-                break;
-            }
-
-            case inClick:
-            {
-                if (key->intervalTime < INTERVAL_THRESHOLD)
-                {
-                    if (key->holdTime > PRESS_THRESHOLD)
-                    {
-                        key->state = multiClick;
-                        key->clickCnt++;
-                    }
-                } else
-                {
-                    MultiClickCallback(key);
-                    key->state = release;
-                }
-                break;
-            }
-
-            case press:
-            {
-                PressCallback(key);
-                if (!key->value)
-                    key->state = release;
-                break;
-            }  
-    
-            case hold:
-            {
-                if (!key->value)
-                {
-                    HoldCallback(key);
-                    key->state = release;
-                }
-                break;
-            }
-
-            case multiClick:
-            {
-                if (!key->value)
-                    key->state = inClick;
-                break;
-            }
-            
-            default:
-                break;
+        case down:
+            key->holdTime = 0;
+            break;
+        case up:
+            key->intervalTime = 0;
+            break;
+        case pressed:
+            key->holdTime += UPDATE_KEY_STATE_MS;
+            break;
+        default:
+            if (key->intervalTime >= 3000)
+                key->intervalTime = 3000;
+            else
+                key->intervalTime += UPDATE_KEY_STATE_MS;
+            break;
         }
+
+        // Store key value
+        key->preValue = key->value;
     }
 }

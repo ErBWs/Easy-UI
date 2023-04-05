@@ -8,50 +8,54 @@
 #ifndef _easy_key_h_
 #define _easy_key_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include "zf_driver_gpio.h"
+#include "zf_driver_delay.h"
 
-#define PRESS_THRESHOLD 20      // Dithering elimination
-#define HOLD_THRESHOLD 100      // Time longer than this is considered as "hold"
-#define INTERVAL_THRESHOLD 80  // Trigger time interval less than this is considered as "multiclick"
+#define FILTER_TIME_US          100     // Dithering elimination
+#define UPDATE_KEY_STATE_MS     1       // Update key state once per (x) ms
+#define HOLD_THRESHOLD_MS       300     // Time longer than this is considered as "hold"
+#define INTERVAL_THRESHOLD_MS   140     // Trigger time interval less than this is considered as "multiClick"
 
 typedef struct EasyKey_typedef
 {
     // Internal call
-    uint8_t value, preVal;      // Press:1  Not press:0
-    uint32_t intervalTime;
+    uint8_t value, cacheValue;      // Press:0  Not press:1
+    uint8_t preValue;
     struct EasyKey_typedef *next;
     gpio_pin_enum pin;
-    uint32_t holdTime;
-    uint32_t clickCnt;
+    uint32_t holdTime, intervalTime;
+
     enum
     {
-        release,
-        dither,
-        preClick,
-        inClick,
-        press,
-        hold,
-        multiClick
+        down,
+        up,
+        pressed,
+        released
     } state;
 
     // User call
     bool isPressed;
     bool isHold;
     bool isMultiClick;
+    uint8_t clickState;
 } EasyKey_t;
 
-extern uint8_t multiClickSwitch;
-
 void EasyKeyInit(EasyKey_t *key, gpio_pin_enum _pin);
-void EasyKeyHandler(uint8_t timer);
+void EasyKeyScanKeyState();
 
-__attribute__((weak)) void SyncValue(EasyKey_t *key);
-__attribute__((weak)) void PressCallback(EasyKey_t *key);
-__attribute__((weak)) void HoldCallback(EasyKey_t *key);
-__attribute__((weak)) void MultiClickCallback(EasyKey_t *key);
-__attribute__((weak)) void ReleaseCallback(EasyKey_t *key);
+extern bool multiClickSwitch;
+void EasyKeyUserApp();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
