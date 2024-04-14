@@ -1,10 +1,18 @@
-# Easy-UI
+# Easy-UI v1.5beta
 
 基于魔改的逐飞屏幕驱动，拙劣地模仿了稚晖君的[MonoUI](https://www.youtube.com/watch?v=44RmDMXcU9s&ab_channel=%E7%A8%9A%E6%99%96%E5%90%9B)实现方式，参考了 [createskyblue](https://gitee.com/createskyblue) / [OpenT12 ](https://gitee.com/createskyblue/OpenT12)项目UI所编写的一个UI。其中的按键库参考了 [Zhewana](https://github.com/Zhewana) / [CommonKey](https://github.com/Zhewana/CommonKey) 开源按键库，该按键库的链表结构给了我很大的启发。
 
-## 样例
+> 本来想重构一下做个v1.6，可惜我太懒了，v1.5beta大概率是最终版本了orz
+
+## 样例(20240414更新：现已完全开源！)
 
 [点这里](./3.Example/menu.c)
+
+抱歉过了这么久才完整开源，总之开源了！
+
+使用IPS096屏幕，参考逐飞库修改而来，同时更新UI使用的CH32V307VCT6芯片掉电存储方案。
+
+实际菜单应用可见[十八届智能车单车开源库](https://github.com/ErBWs/CH32-Bike-Overland)
 
 ## 实现方式浅析
 
@@ -25,8 +33,6 @@
 每次系统初始化时判断`flash`内相应区域是否为空，若非空则读取一次数据。
 
 > ‼️每次增减菜单结构请先**擦除全片**再进行烧录
->
-> 此部分仅部分开源，完整代码后续会在工程项目中开源
 
 ## 相对MonoUI的一些更改
 
