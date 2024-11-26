@@ -1,8 +1,16 @@
-# Easy-UI v1.5beta
+# Easy-UI v1.5b
 
-基于魔改的逐飞屏幕驱动，拙劣地模仿了稚晖君的[MonoUI](https://www.youtube.com/watch?v=44RmDMXcU9s&ab_channel=%E7%A8%9A%E6%99%96%E5%90%9B)实现方式，参考了 [createskyblue](https://gitee.com/createskyblue) / [OpenT12 ](https://gitee.com/createskyblue/OpenT12)项目UI所编写的一个UI。其中的按键库参考了 [Zhewana](https://github.com/Zhewana) / [CommonKey](https://github.com/Zhewana/CommonKey) 开源按键库，该按键库的链表结构给了我很大的启发。
+基于魔改的逐飞屏幕驱动，拙劣地模仿了稚晖君的 [MonoUI](https://www.youtube.com/watch?v=44RmDMXcU9s&ab_channel=%E7%A8%9A%E6%99%96%E5%90%9B) 实现方式，参考了 [createskyblue](https://gitee.com/createskyblue) / [OpenT12 ](https://gitee.com/createskyblue/OpenT12)项目UI所编写的一个UI。其中的按键库参考了 [Zhewana](https://github.com/Zhewana) / [CommonKey](https://github.com/Zhewana/CommonKey) 开源按键库，该按键库的链表结构给了我很大的启发。
 
-> 本来想重构一下做个v1.6，可惜我太懒了，v1.5beta大概率是最终版本了orz
+> 本来想重构一下做个v1.6，可惜我太懒了，v1.5b大概率是最终版本了orz
+
+# Easy-UI v1.5se
+
+基于逐飞屏幕库，不再需要魔改屏幕库；删去所有动画，仅保留框架，专为智能车竞赛设计的通用版本。
+
+目的是为了解决正常菜单开发中需要为每个条目单独写很多代码，删减菜单内容会非常耗时。
+
+推荐使用 6x8 字体大小获得更好的体验。
 
 ## 样例(20240414更新：现已完全开源！)
 
